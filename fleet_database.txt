@@ -1,0 +1,3 @@
+Luxury,VIN-MERC-2005,Mercedes-Benz ML 320,2005,245000.0
+Truck,VIN-VOLV-2018,Volvo Heavy Truck,2018,120000.0
+Luxury,toyota,2005,2000,200123.0
