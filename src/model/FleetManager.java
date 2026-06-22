@@ -25,14 +25,15 @@ public class FleetManager {
         return fleetList;
     }
 
-    // دالة حسابية متقدمة: تحسب إجمالي مصاريف الصيانة المتوقعة للأسطول بالكامل
-    // نستخدم فيها الـ Polymorphism لأن كل سيارة تحسب تكلفتها حسب نوعها تلقائياً
-    public double calculateTotalEstimatedFleetCost(double baseCost) {
+   // دالة حسابية متقدمة: تحسب إجمالي مصاريف الصيانة الفعلية للأسطول بالكامل
+    // نستخدم فيها الـ Polymorphism لأن البرنامج يمر على كل مركبة ويستدعي حسبتها الخاصة
+    public double calculateTotalEstimatedFleetCost() {
         double totalCost = 0.0;
         
-        // Loop ليمر على كل السيارات في الأسطول ويجمع تكاليفها
+        // Loop ليمر على كل السيارات في الأسطول ويجمع تكاليفها ديناميكياً
         for (Vehicle v : fleetList) {
-            totalCost += v.calculateEstimatedMaintenanceCost(baseCost);
+            // استدعاء الدالة الديناميكية الجديدة التي لا تأخذ معاملات (No parameters)
+            totalCost += v.calculateMaintenanceCost();
         }
         
         return totalCost;

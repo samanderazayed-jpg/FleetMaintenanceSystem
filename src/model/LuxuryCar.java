@@ -13,9 +13,10 @@ public class LuxuryCar extends Vehicle {
     }
 
     // تطبيق مفهوم التعددية الشكلية (Method Overriding)
+   
     @Override
-    public double calculateEstimatedMaintenanceCost(double baseCost) {
-        // السيارات الفاخرة تكلفة صيانتها أعلى بنسبة 50% من التكلفة الأساسية
-        return baseCost * 1.5;
-    }
+public double calculateMaintenanceCost() {
+    // تكلفة السيارة الفارهة = التكلفة الأساسية (100) + 300 دولار إضافية للفخامة
+    return super.calculateMaintenanceCost() + 300.0;
+}
 }

@@ -12,9 +12,10 @@ public class Truck extends Vehicle {
     }
 
     // إعادة كتابة الدالة لتناسب الشاحنات (Polymorphism)
+    
     @Override
-    public double calculateEstimatedMaintenanceCost(double baseCost) {
-        // الشاحنات تكلفة صيانتها ضعف التكلفة العادية نظراً لحجمها وجهدها
-        return baseCost * 2.0;
-    }
+public double calculateMaintenanceCost() {
+    // تكلفة الشاحنة = التكلفة الأساسية (100) + 150 دولار إضافية للشاحنات
+    return super.calculateMaintenanceCost() + 150.0; 
+}
 }
