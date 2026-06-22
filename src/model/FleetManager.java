@@ -14,7 +14,9 @@ public class FleetManager {
     public FleetManager() {
         this.fleetList = new ArrayList<>();
     }
-
+    public void setFleetList(ArrayList<Vehicle> fleetList) {
+    this.fleetList = fleetList; 
+}
     // دالة لإضافة سيارة جديدة إلى الأسطول (تخدم الـ Use Case الأول)
     public void addVehicle(Vehicle vehicle) {
         fleetList.add(vehicle);

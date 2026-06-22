@@ -22,16 +22,23 @@ public abstract class Vehicle implements Serializable {
         this.currentOdometer = currentOdometer;
         this.maintenanceHistory = new ArrayList<>(); // تهيئة القائمة لمنع الـ NullPointerException
     }
-
+     // دالة أساسية ترجع التكلفة الافتراضية، وسيتم إعادة كتابتها (Overriding) في السيارات الفرعية
+public double getServiceCostByType(String serviceType) {
+    if (serviceType.equals("Oil Change")) return 50.0;
+    if (serviceType.equals("Tire Replacement")) return 200.0;
+    if (serviceType.equals("Gearbox Service")) return 500.0;
+    return 0.0;
+}
     // دالة حساب التكلفة الديناميكية الجديدة المعتمدة على الـ Combo Box والأسعار التلقائية
     public double calculateMaintenanceCost() {
         double total = 0.0;
-        if (this.maintenanceHistory != null) {
-            for (MaintenanceRecord record : this.maintenanceHistory) {
-                total += record.getCost(); // جمع تكلفة كل خدمة مضافة للسيارة (50 أو 200 أو 500)
-            }
+    if (this.getMaintenanceHistory() != null) {
+        for (MaintenanceRecord record : this.getMaintenanceHistory()) {
+            // استدعاء دالة السعر المتغيرة بتغير نوع الكائن الحالي
+            total += this.getServiceCostByType(record.getServiceType()); 
         }
-        return total;
+    }
+    return total;
     }
 
     // دالة للوصول لقائمة تاريخ الصيانة (Getter) يحتاجها زر الـ Dashboard

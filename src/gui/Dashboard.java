@@ -68,7 +68,7 @@ public class Dashboard extends javax.swing.JFrame {
 
         addButton.setText("Add vehicle");
         addButton.addActionListener(this::addButtonActionPerformed);
-        getContentPane().add(addButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 260, -1, -1));
+        getContentPane().add(addButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 220, -1, -1));
 
         fleetTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -83,7 +83,7 @@ public class Dashboard extends javax.swing.JFrame {
         ));
         jScrollPane1.setViewportView(fleetTable);
 
-        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, 380, 210));
+        getContentPane().add(jScrollPane1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 40, 380, 160));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         jLabel1.setText("Registration");
@@ -91,19 +91,19 @@ public class Dashboard extends javax.swing.JFrame {
 
         jButton2.setText("Calculate Fleet Cost");
         jButton2.addActionListener(this::jButton2ActionPerformed);
-        getContentPane().add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 300, -1, -1));
+        getContentPane().add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 250, -1, -1));
 
         updateButton.setText("Edit");
         updateButton.addActionListener(this::updateButtonActionPerformed);
-        getContentPane().add(updateButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(150, 260, -1, -1));
+        getContentPane().add(updateButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 220, -1, -1));
 
         deleteButton.setText("Delete");
         deleteButton.addActionListener(this::deleteButtonActionPerformed);
-        getContentPane().add(deleteButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(250, 260, -1, -1));
+        getContentPane().add(deleteButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 220, -1, -1));
 
         addMaintenanceButton.setText("Add Maintenance");
         addMaintenanceButton.addActionListener(this::addMaintenanceButtonActionPerformed);
-        getContentPane().add(addMaintenanceButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 300, -1, -1));
+        getContentPane().add(addMaintenanceButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 250, -1, -1));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -161,7 +161,7 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-        // 1. التأكد من أن المستخدم حدد سيارة من الجدول
+    // 1. التأكد من أن المستخدم حدد سيارة من الجدول
     int selectedRow = fleetTable.getSelectedRow();
     
     if (selectedRow == -1) {
@@ -190,11 +190,14 @@ public class Dashboard extends javax.swing.JFrame {
                 return;
             }
             
-            // 4. بناء نص التقرير المفصل للخدمات المضافة
+            // 4. بناء نص التقرير المفصل والفاتورة المنسقة
             StringBuilder report = new StringBuilder();
-            report.append("=== Individual Maintenance Report ===\n");
+            report.append("==================================================\n");
+            report.append("          FLEET MAINTENANCE SYSTEM - INVOICE       \n");
+            report.append("==================================================\n");
+            report.append("Date of Issue: 2026-06-22\n");
             report.append("Vehicle Model: ").append(selectedModel).append("\n");
-            report.append("VIN: ").append(selectedVin).append("\n");
+            report.append("VIN Number   : ").append(selectedVin).append("\n");
             report.append("--------------------------------------------------\n");
             report.append(String.format("%-18s | %-12s | %-10s\n", "Service Type", "Cost", "Date"));
             report.append("--------------------------------------------------\n");
@@ -209,19 +212,46 @@ public class Dashboard extends javax.swing.JFrame {
             
             report.append("--------------------------------------------------\n");
             // حساب المجموع الخاص بهذه السيارة فقط ديناميكياً
-            report.append(String.format("Total Vehicle Maintenance Cost: $%.2f", v.calculateMaintenanceCost()));
+            report.append(String.format("TOTAL AMOUNT DUE: $%.2f\n", v.calculateMaintenanceCost()));
+            report.append("==================================================\n");
+            report.append("            Thank you for your business!          \n");
+            report.append("==================================================\n");
             
-            // 5. عرض التقرير المستقل بشكل منسق داخل JTextArea لترتيب المسافات
-            javax.swing.JTextArea textArea = new javax.swing.JTextArea(report.toString());
+            // 5. إنشاء منطقة النص وضبط الإعدادات والخط
+            final javax.swing.JTextArea textArea = new javax.swing.JTextArea(report.toString());
             textArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12));
             textArea.setEditable(false);
             
-            javax.swing.JOptionPane.showMessageDialog(this, 
-                new javax.swing.JScrollPane(textArea), 
+            javax.swing.JScrollPane scrollPane = new javax.swing.JScrollPane(textArea);
+            scrollPane.setPreferredSize(new java.awt.Dimension(480, 360));
+            
+            // 6. الحل هنا: تحديد الأزرار المخصصة التي ستظهر أسفل النافذة جنب بعضها
+            String[] options = {"Print Invoice", "Close"};
+            
+            int choice = javax.swing.JOptionPane.showOptionDialog(
+                this, 
+                scrollPane, 
                 "Vehicle Maintenance Report", 
-                javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                javax.swing.JOptionPane.DEFAULT_OPTION, 
+                javax.swing.JOptionPane.PLAIN_MESSAGE, 
+                null, 
+                options, 
+                options[0] // الزر الافتراضي المحدد هو طباعة
+            );
+            
+            // 7. إذا ضغط المستخدم على زر Print Invoice، نقوم باستدعاء نافذة الطباعة الحقيقية للجهاز
+            if (choice == 0) {
+                try {
+                    boolean complete = textArea.print();
+                    if (complete) {
+                        javax.swing.JOptionPane.showMessageDialog(this, "Printing Complete!", "Success", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                    }
+                } catch (java.awt.print.PrinterException e) {
+                    javax.swing.JOptionPane.showMessageDialog(this, "Printing Failed: " + e.getMessage(), "Print Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+                }
+            }
                 
-            return; // الخروج من الدالة بمجرد العثور على السيارة وعرض تقريرها
+            return; // الخروج من الدالة بعد العثور على السيارة وعرض تقريرها
         }
     }
       
@@ -314,7 +344,7 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void addMaintenanceButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_addMaintenanceButtonActionPerformed
         // TODO add your handling code here:
-        try {
+       try {
         // 1. فحص هل حدد المستخدم سيارة من الجدول بالفأرة أولاً
         int selectedRow = fleetTable.getSelectedRow();
         if (selectedRow == -1) {
@@ -322,7 +352,7 @@ public class Dashboard extends javax.swing.JFrame {
             return;
         }
         
-        // 2. إظهار الـ Combo Box الذكي على الشاشة تلقائياً ليختار المستخدم نوع الصيانة
+        // 2. إظهار الـ Combo Box ليختار المستخدم نوع الصيانة
         String[] maintenanceTypes = {"Oil Change", "Tire Replacement", "Gearbox Service"};
         String selectedService = (String) javax.swing.JOptionPane.showInputDialog(
                 this, 
@@ -336,27 +366,21 @@ public class Dashboard extends javax.swing.JFrame {
         
         if (selectedService == null) return; // إذا أقفل المستخدم النافذة
 
-        // 3. تحديد السعر تلقائياً بناءً على اختيار الـ Combo Box (الطريقة الثانية)
-        double calculatedCost = 0.0;
-        if (selectedService.equals("Oil Change")) {
-            calculatedCost = 50.0; 
-        } else if (selectedService.equals("Tire Replacement")) {
-            calculatedCost = 200.0; 
-        } else if (selectedService.equals("Gearbox Service")) {
-            calculatedCost = 500.0; 
-        }
-
-        // 4. طلب التاريخ من المستخدم في نافذة سريعة
+        // 3. طلب التاريخ من المستخدم في نافذة سريعة
         String date = javax.swing.JOptionPane.showInputDialog(this, "Enter Date (YYYY-MM-DD):", "2026-06-22");
         if (date == null || date.trim().isEmpty()) return;
 
-        // 5. جلب الـ VIN للمركبة المحددة لربط الصيانة بها
+        // 4. جلب الـ VIN للمركبة المحددة لربط الصيانة بها
         String targetVin = fleetTable.getValueAt(selectedRow, 1).toString();
         
-        // 6. البحث عن المركبة داخل الأسطول وإضافة السجل لها
+        // 5. البحث عن المركبة داخل الأسطول
         for (model.Vehicle v : manager.getFleetList()) {
             if (v.getVin().equals(targetVin)) {
-                // إنشاء كائن سجل الصيانة الجديد
+                
+                // التعديل السحري هنا: جلب السعر ديناميكياً حسب نوع المركبة (Polymorphism)
+                double calculatedCost = v.getServiceCostByType(selectedService);
+                
+                // إنشاء كائن سجل الصيانة الجديد بالسعر المخصص للسيارة
                 model.MaintenanceRecord newRecord = new model.MaintenanceRecord(selectedService, calculatedCost, date);
                 
                 // إضافة السجل الجديد لقائمة تاريخ صيانة هذه المركبة
@@ -365,8 +389,11 @@ public class Dashboard extends javax.swing.JFrame {
                 // حفظ البيانات فوراً في ملف قاعدة البيانات النصي لكي لا تضيع
                 database.DatabaseService.saveFleetData(manager);
                 
-                // إعلام المستخدم بنجاح العملية والسعر التلقائي
-                javax.swing.JOptionPane.showMessageDialog(this, "Maintenance Record Added Successfully!\nService: " + selectedService + "\nCost Saved: $" + calculatedCost);
+                // إعلام المستخدم بنجاح العملية وعرض السعر الذكي التلقائي الذي تم حسابه
+                javax.swing.JOptionPane.showMessageDialog(this, 
+                        "Maintenance Record Added Successfully!\n" +
+                        "Service: " + selectedService + "\n" +
+                        "Cost for this Vehicle Type: $" + calculatedCost);
                 break;
             }
         }

@@ -11,12 +11,18 @@ public class LuxuryCar extends Vehicle {
     public LuxuryCar(String vin, String model, int year, double currentOdometer) {
         super(vin, model, year, currentOdometer);
     }
-
+      @Override
+public double getServiceCostByType(String serviceType) {
+    if (serviceType.equals("Oil Change")) return 120.0;       // زيت سيارة فاخرة أغلى
+    if (serviceType.equals("Tire Replacement")) return 400.0; // إطارات سيارة فاخرة
+    if (serviceType.equals("Gearbox Service")) return 800.0;
+    return 0.0;
+}
     // تطبيق مفهوم التعددية الشكلية (Method Overriding)
    
     @Override
 public double calculateMaintenanceCost() {
     // تكلفة السيارة الفارهة = التكلفة الأساسية (100) + 300 دولار إضافية للفخامة
-    return super.calculateMaintenanceCost() + 300.0;
+    return super.calculateMaintenanceCost() ;
 }
 }
