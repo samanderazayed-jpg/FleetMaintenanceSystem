@@ -26,6 +26,29 @@ public class Dashboard extends javax.swing.JFrame {
         manager = new FleetManager();
         DatabaseService.loadFleetData(manager);
         refreshTable();
+        try {
+        // 1. جلب الصورة الأصلية من مجلد المشروع
+        java.net.URL imgURL = getClass().getResource("/images/logo.png");
+        if (imgURL != null) {
+            javax.swing.ImageIcon originalIcon = new javax.swing.ImageIcon(imgURL);
+            
+            // 2. الحسبة الذكية: جلب طول وعرض الـ JLabel الحالي الذي صممته بيدك
+            int width = jLabel3.getWidth();
+            int height = jLabel3.getHeight();
+            
+            // في حال كان الـ JLabel لم يرسم بعد وحجمه صفر، نعطيه حجماً افتراضياً مناسباً
+            if (width == 0) width = 350; 
+            if (height == 0) height = 250;
+            
+            // 3. عمل تحجيم (Scale) للصورة لتناسب أبعاد الـ JLabel بالضبط وبنعومة
+            java.awt.Image scaledImage = originalIcon.getImage().getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH);
+            
+            // 4. وضع الصورة المحجمة الجديدة داخل الـ JLabel
+            jLabel3.setIcon(new javax.swing.ImageIcon(scaledImage));
+        }
+    } catch (Exception e) {
+        System.err.println("Error resizing logo: " + e.getMessage());
+    }
     }
      private void refreshTable() {
     DefaultTableModel model = (DefaultTableModel) fleetTable.getModel();
@@ -62,13 +85,14 @@ public class Dashboard extends javax.swing.JFrame {
         updateButton = new javax.swing.JButton();
         deleteButton = new javax.swing.JButton();
         addMaintenanceButton = new javax.swing.JButton();
+        jLabel3 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         addButton.setText("Add vehicle");
         addButton.addActionListener(this::addButtonActionPerformed);
-        getContentPane().add(addButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 220, -1, -1));
+        getContentPane().add(addButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 250, -1, -1));
 
         fleetTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -91,19 +115,22 @@ public class Dashboard extends javax.swing.JFrame {
 
         jButton2.setText("Calculate Fleet Cost");
         jButton2.addActionListener(this::jButton2ActionPerformed);
-        getContentPane().add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(40, 250, -1, -1));
+        getContentPane().add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 310, -1, -1));
 
         updateButton.setText("Edit");
         updateButton.addActionListener(this::updateButtonActionPerformed);
-        getContentPane().add(updateButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(130, 220, -1, -1));
+        getContentPane().add(updateButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(140, 250, -1, -1));
 
         deleteButton.setText("Delete");
         deleteButton.addActionListener(this::deleteButtonActionPerformed);
-        getContentPane().add(deleteButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(220, 220, -1, -1));
+        getContentPane().add(deleteButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(260, 250, -1, -1));
 
         addMaintenanceButton.setText("Add Maintenance");
         addMaintenanceButton.addActionListener(this::addMaintenanceButtonActionPerformed);
-        getContentPane().add(addMaintenanceButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(190, 250, -1, -1));
+        getContentPane().add(addMaintenanceButton, new org.netbeans.lib.awtextra.AbsoluteConstraints(200, 310, -1, -1));
+
+        jLabel3.setIcon(new javax.swing.ImageIcon("C:\\Users\\xxx\\Documents\\NetBeansProjects\\FleetMaintenanceSystem\\src\\image\\logo.png.png")); // NOI18N
+        getContentPane().add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(-50, -20, 1010, 550));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -161,100 +188,123 @@ public class Dashboard extends javax.swing.JFrame {
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
-    // 1. التأكد من أن المستخدم حدد سيارة من الجدول
-    int selectedRow = fleetTable.getSelectedRow();
-    
-    if (selectedRow == -1) {
-        javax.swing.JOptionPane.showMessageDialog(this, 
-            "Please select a specific vehicle from the table to view its individual maintenance report.", 
-            "Selection Required", javax.swing.JOptionPane.WARNING_MESSAGE);
-        return;
-    }
-    
-    // 2. جلب رقم الهيكل الـ VIN والموديل من السطر المحدد (العمود الثاني والثالث)
-    String selectedVin = fleetTable.getValueAt(selectedRow, 1).toString();
-    String selectedModel = fleetTable.getValueAt(selectedRow, 2).toString();
-    
-    // 3. البحث عن المركبة داخل قائمة الأسطول
-    for (model.Vehicle v : manager.getFleetList()) {
-        if (v.getVin().equals(selectedVin)) {
-            
-            // جلب تاريخ سجلات الصيانة الخاص بهذه المركبة بالتحديد
-            java.util.ArrayList<model.MaintenanceRecord> history = v.getMaintenanceHistory();
-            
-            // إذا لم يتم إضافة أي صيانة لهذه السيارة حتى الآن
-            if (history == null || history.isEmpty()) {
-                javax.swing.JOptionPane.showMessageDialog(this, 
-                    "No maintenance records found for Vehicle (Model: " + selectedModel + ", VIN: " + selectedVin + ").\nTotal Cost: $0.00", 
-                    "Individual Report", javax.swing.JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
-            
-            // 4. بناء نص التقرير المفصل والفاتورة المنسقة
-            StringBuilder report = new StringBuilder();
-            report.append("==================================================\n");
-            report.append("          FLEET MAINTENANCE SYSTEM - INVOICE       \n");
-            report.append("==================================================\n");
-            report.append("Date of Issue: 2026-06-22\n");
-            report.append("Vehicle Model: ").append(selectedModel).append("\n");
-            report.append("VIN Number   : ").append(selectedVin).append("\n");
-            report.append("--------------------------------------------------\n");
-            report.append(String.format("%-18s | %-12s | %-10s\n", "Service Type", "Cost", "Date"));
-            report.append("--------------------------------------------------\n");
-            
-            // التكرار لعرض كل خدمة وسعرها وتاريخها
-            for (model.MaintenanceRecord record : history) {
-                report.append(String.format("%-18s | $%-11.2f | %-10s\n", 
-                        record.getServiceType(), 
-                        record.getCost(), 
-                        record.getDate()));
-            }
-            
-            report.append("--------------------------------------------------\n");
-            // حساب المجموع الخاص بهذه السيارة فقط ديناميكياً
-            report.append(String.format("TOTAL AMOUNT DUE: $%.2f\n", v.calculateMaintenanceCost()));
-            report.append("==================================================\n");
-            report.append("            Thank you for your business!          \n");
-            report.append("==================================================\n");
-            
-            // 5. إنشاء منطقة النص وضبط الإعدادات والخط
-            final javax.swing.JTextArea textArea = new javax.swing.JTextArea(report.toString());
-            textArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12));
-            textArea.setEditable(false);
-            
-            javax.swing.JScrollPane scrollPane = new javax.swing.JScrollPane(textArea);
-            scrollPane.setPreferredSize(new java.awt.Dimension(480, 360));
-            
-            // 6. الحل هنا: تحديد الأزرار المخصصة التي ستظهر أسفل النافذة جنب بعضها
-            String[] options = {"Print Invoice", "Close"};
-            
-            int choice = javax.swing.JOptionPane.showOptionDialog(
-                this, 
-                scrollPane, 
-                "Vehicle Maintenance Report", 
-                javax.swing.JOptionPane.DEFAULT_OPTION, 
-                javax.swing.JOptionPane.PLAIN_MESSAGE, 
-                null, 
-                options, 
-                options[0] // الزر الافتراضي المحدد هو طباعة
-            );
-            
-            // 7. إذا ضغط المستخدم على زر Print Invoice، نقوم باستدعاء نافذة الطباعة الحقيقية للجهاز
-            if (choice == 0) {
-                try {
-                    boolean complete = textArea.print();
-                    if (complete) {
-                        javax.swing.JOptionPane.showMessageDialog(this, "Printing Complete!", "Success", javax.swing.JOptionPane.INFORMATION_MESSAGE);
-                    }
-                } catch (java.awt.print.PrinterException e) {
-                    javax.swing.JOptionPane.showMessageDialog(this, "Printing Failed: " + e.getMessage(), "Print Error", javax.swing.JOptionPane.ERROR_MESSAGE);
-                }
-            }
-                
-            return; // الخروج من الدالة بعد العثور على السيارة وعرض تقريرها
+    // 1. التأكد من أن المستخدم حدد مركبة من الجدول
+        int selectedRow = fleetTable.getSelectedRow();
+        
+        if (selectedRow == -1) {
+            javax.swing.JOptionPane.showMessageDialog(this, 
+                "Please select a specific vehicle from the table to view its individual maintenance report.", 
+                "Selection Required", javax.swing.JOptionPane.WARNING_MESSAGE);
+            return;
         }
-    }
-      
+        
+        // 2. جلب رقم الهيكل الـ VIN والموديل من السطر المحدد
+        String selectedVin = fleetTable.getValueAt(selectedRow, 1).toString();
+        String selectedModel = fleetTable.getValueAt(selectedRow, 2).toString();
+        
+        // 3. البحث عن المركبة داخل قائمة الأسطول
+        for (model.Vehicle v : manager.getFleetList()) {
+            if (v.getVin().equals(selectedVin)) {
+                
+                java.util.ArrayList<model.MaintenanceRecord> history = v.getMaintenanceHistory();
+                
+                // إذا لم يتم إضافة أي صيانة لهذه السيارة حتى الآن
+                if (history == null || history.isEmpty()) {
+                    javax.swing.JOptionPane.showMessageDialog(this, 
+                        "No maintenance records found for Vehicle (Model: " + selectedModel + ", VIN: " + selectedVin + ").\nTotal Cost: $0.00", 
+                        "Individual Report", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                    return;
+                }
+                
+                // 4. بناء نص التقرير المنسق
+                StringBuilder report = new StringBuilder();
+                report.append("==================================================\n");
+                report.append("          FLEET MAINTENANCE SYSTEM - INVOICE       \n");
+                report.append("==================================================\n");
+                report.append("Date of Issue: 2026-06-22\n");
+                report.append("Vehicle Model: ").append(selectedModel).append("\n");
+                report.append("VIN Number   : ").append(selectedVin).append("\n");
+                report.append("--------------------------------------------------\n");
+                report.append(String.format("%-18s | %-12s | %-10s\n", "Service Type", "Cost", "Date"));
+                report.append("--------------------------------------------------\n");
+                
+                for (model.MaintenanceRecord record : history) {
+                    report.append(String.format("%-18s | $%-11.2f | %-10s\n", 
+                            record.getServiceType(), 
+                            record.getCost(), 
+                            record.getDate()));
+                }
+                
+                report.append("--------------------------------------------------\n");
+                report.append(String.format("TOTAL AMOUNT DUE: $%.2f\n", v.calculateMaintenanceCost()));
+                report.append("==================================================\n");
+                report.append("            Thank you for your business!          \n");
+                report.append("==================================================\n");
+                
+                // 5. الحركة الذكية: إنشاء الـ TextArea وتفعيل رسم اللوجو المائي في خلفيته
+                // 5. إنشاء منطقة النص وتوسيع اللوجو المائي ليمتد ويغطي الفاتورة بالكامل
+                final javax.swing.JTextArea textArea = new javax.swing.JTextArea(report.toString()) {
+                    @Override
+                    protected void paintComponent(java.awt.Graphics g) {
+                        try {
+                            // قراءة الصورة الشفافة من المجلد الخاص بك
+                            java.awt.Image watermark = new javax.swing.ImageIcon(getClass().getResource("/image/logo_watermark.png.png")).getImage();
+                            
+                            // الحسبة الذكية الجديدة: جلب العرض والارتفاع الكامل للفاتورة ديناميكياً
+                            int width = this.getWidth();
+                            int height = this.getHeight();
+                            
+                            // رسم الصورة لتمتد وتغطي كامل المساحة المتاحة خلف النص (من الحافة إلى الحافة)
+                            g.drawImage(watermark, 0, 0, width, height, this);
+                        } catch (Exception e) {
+                            // يستمر البرنامج في حال عدم العثور على الصورة
+                        }
+                        super.paintComponent(g); // رسم نصوص الفاتورة فوق اللوجو الممتد
+                    }
+                };
+                
+                // إعدادات الشفافية والخطوط (مهمة جداً لإزالة أي خلفية بيضاء مقتصة)
+                textArea.setOpaque(false); 
+                textArea.setFont(new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 12));
+                textArea.setEditable(false);
+                
+                javax.swing.JScrollPane scrollPane = new javax.swing.JScrollPane(textArea);
+                scrollPane.setPreferredSize(new java.awt.Dimension(480, 360));
+                
+                // 6. إنشاء لوحة (JPanel) لإضافة مسافة أمان (Padding) للأزرار
+                javax.swing.JPanel mainPanel = new javax.swing.JPanel(new java.awt.BorderLayout());
+                mainPanel.add(scrollPane, java.awt.BorderLayout.CENTER);
+                mainPanel.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 20, 10)); // إبعاد الأزرار عن الحافة
+                
+                // تحديد خيارات الأزرار
+                String[] options = {"Print Invoice", "Close"};
+                
+                int choice = javax.swing.JOptionPane.showOptionDialog(
+                    this, 
+                    mainPanel, 
+                    "Vehicle Maintenance Report & Invoice", 
+                    javax.swing.JOptionPane.DEFAULT_OPTION, 
+                    javax.swing.JOptionPane.PLAIN_MESSAGE, 
+                    null, 
+                    options, 
+                    options[0]
+                );
+                
+                // 7. استدعاء الطباعة للجهاز الحقيقي في حال ضغط زر Print
+                if (choice == 0) {
+                    try {
+                        boolean complete = textArea.print();
+                        if (complete) {
+                            javax.swing.JOptionPane.showMessageDialog(this, "Printing Sent to Hardware Successfully!", "Success", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    } catch (java.awt.print.PrinterException e) {
+                        javax.swing.JOptionPane.showMessageDialog(this, "Printing Failed: " + e.getMessage(), "Print Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+                
+                return; 
+            }
+        }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
@@ -436,6 +486,7 @@ public class Dashboard extends javax.swing.JFrame {
     private javax.swing.JTable fleetTable;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton updateButton;
     // End of variables declaration//GEN-END:variables
